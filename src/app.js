@@ -19,7 +19,7 @@ const theme = {home:['#8dc63f','#f3f8e9','#547f1a'],school:['#00aeef','#edf9fe',
 const color = category => {const t=theme[category];return `--accent:${t[0]};--soft:${t[1]};--accent-dark:${t[2]}`;};
 const button = (action, label, cls='', symbol='', extra='') => `<button class="btn ${cls}" data-action="${action}" ${extra}>${symbol?icon(symbol):''}${e(label)}</button>`;
 const media = (text, kind='scene', src=null, large=null) => src
-  ? `<button type="button" class="scene-media with-art" data-media="${kind}" data-action="zoom" data-src="${e(large||src)}" data-caption="${e(text)}" aria-label="Μεγέθυνση: ${e(text)}"><img src="${e(src)}" alt="${e(text)}" decoding="async" width="320" height="320"><span class="zoom-hint" aria-hidden="true">⤢</span></button>`
+  ? `<button type="button" class="scene-media with-art" data-media="${kind}" data-action="zoom" data-src="${e(large||src)}" data-caption="${e(text)}" aria-label="Μεγέθυνση: ${e(text)}"><img src="${e(src)}" alt="${e(text)}" decoding="async" width="480" height="480"><span class="zoom-hint" aria-hidden="true">⤢</span></button>`
   : `<div class="scene-media" data-media="${kind}" role="img" aria-label="${e(text)}. Η εικόνα δεν έχει δημιουργηθεί ακόμη."><div class="media-mark">${icon('picture')}</div><span>Η εικόνα θα προστεθεί</span></div>`;
 const editorialMode = ['127.0.0.1','localhost','[::1]'].includes(location.hostname);
 const categoryImages = {home:'place-home',school:'place-school',outside:'place-park'};
@@ -131,7 +131,7 @@ for(const [id,key] of [['show-feedback','feedback'],['show-notes','notes'],['lar
 }
 window.addEventListener('hashchange',()=>{if(bank)loadRoute();});
 try {
-  const response=await fetch('data/scenarios.json?v=20260917-small-nospeech');if(!response.ok)throw new Error('Δεν βρέθηκαν τα κείμενα.');
+  const response=await fetch('data/scenarios.json?v=20260917-quality480');if(!response.ok)throw new Error('Δεν βρέθηκαν τα κείμενα.');
   bank=await response.json();if(!Array.isArray(bank.scenes)||!bank.categories.every(c=>bank.scenes.filter(s=>s.category===c.id).length===c.count))throw new Error('Η τράπεζα περιεχομένου είναι ελλιπής.');
   loadRoute();
 } catch(error) {
