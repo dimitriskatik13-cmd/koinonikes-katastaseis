@@ -25,7 +25,7 @@ const editorialMode = ['127.0.0.1','localhost','[::1]'].includes(location.hostna
 const categoryImages = {home:'place-home',school:'place-school',outside:'place-park'};
 let bank, scene, layout = [], selected = null, route = 'home', category = null;
 const previousLayouts = new Map();
-const preferences = {feedback:false, notes:false, large:false};
+const preferences = {feedback:false, notes:false, large:false, captions:true};
 
 function categoryLabel(id) { return bank.categories.find(c=>c.id===id)?.label || ''; }
 function toolbar(extra='') {
@@ -122,9 +122,10 @@ document.querySelector('#close-settings-x').onclick=()=>settings.close();
 settings.addEventListener('close',()=>document.body.classList.remove('drawer-open'));
 document.querySelector('.skip').onclick=event=>{event.preventDefault();main.focus();};
 settings.addEventListener('click',event=>{if(event.target===settings&&event.clientX<settings.getBoundingClientRect().left)settings.close();});
-for(const [id,key] of [['show-feedback','feedback'],['show-notes','notes'],['large-text','large']]){
+for(const [id,key] of [['show-feedback','feedback'],['show-notes','notes'],['large-text','large'],['show-captions','captions']]){
   document.getElementById(id).addEventListener('change',event=>{
     preferences[key]=event.target.checked;document.body.classList.toggle('large-text',preferences.large);
+    document.body.classList.toggle('hide-captions',!preferences.captions);
     if(route==='scene'&&scene)showScene();
   });
 }

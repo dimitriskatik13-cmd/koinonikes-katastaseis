@@ -19,3 +19,6 @@ dialog{border:0;color:var(--grey)}#settings{margin:0 0 0 auto;width:min(390px,94
 #picture-dialog{width:min(800px,94vw);max-width:94vw;max-height:94dvh;border:1px solid var(--line);border-radius:24px;padding:20px;overflow:auto;box-shadow:0 16px 80px #0002}
 #picture-dialog::backdrop{background:#26324488}.picture-head{display:flex;align-items:center;justify-content:space-between;gap:16px}.picture-head h2{margin:0;font-size:18px}#picture-large{display:block;width:100%;height:min(66dvh,680px);object-fit:contain;margin-top:12px}#picture-caption{font-size:18px;line-height:1.6;margin:15px 0 0}
 @media(max-width:650px){.scene-media.with-art{height:270px}.outcome .scene-media.with-art{height:245px}#picture-dialog{padding:14px}#picture-caption{font-size:16px}}
+
+/* Only visual image descriptions follow this preference; choices stay visible. */
+.hide-captions .scene-context,.hide-captions .outcome>p,.hide-captions #picture-caption{display:none}

@@ -8,7 +8,7 @@
   <title>Τι μπορώ να κάνω; · ΣΥΝΟΙΔΑ</title>
   <link rel="icon" href="assets/logo.webp">
   <link rel="preload" href="assets/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles/app.css?v=20260917-small-nospeech">
+  <link rel="stylesheet" href="styles/app.css?v=20260917-captions">
   <link rel="stylesheet" href="styles/shared-ui.css?v=20260917-small-nospeech">
 </head>
 <body>
@@ -23,6 +23,7 @@
     <div class="drawer-head"><h2 id="settings-title"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="15" cy="7" r="2.5"/><circle cx="9" cy="17" r="2.5"/></svg>Ρυθμίσεις θεραπευτή</h2><button class="drawer-close" id="close-settings-x" aria-label="Κλείσιμο">✕</button></div>
     <div class="drawer-body">
       <p class="drawer-sec">Εμφάνιση</p>
+      <label class="opt" for="show-captions"><span class="opt-text"><span class="opt-title">Περιγραφές εικόνων</span><span class="opt-desc">Κείμενα κάτω από τις εικόνες και στη μεγέθυνση.</span></span><input class="switch" id="show-captions" type="checkbox" checked></label>
       <label class="opt" for="show-feedback"><span class="opt-text"><span class="opt-title">Σχόλιο για την επιλογή</span><span class="opt-desc">Μετά τις δύο πιθανές συνέπειες.</span></span><input class="switch" id="show-feedback" type="checkbox"></label>
       <label class="opt" for="show-notes"><span class="opt-text"><span class="opt-title">Σημειώσεις θεραπευτή</span><span class="opt-desc">Στόχος και σημεία για συζήτηση.</span></span><input class="switch" id="show-notes" type="checkbox"></label>
       <label class="opt" for="large-text"><span class="opt-text"><span class="opt-title">Μεγαλύτερα γράμματα</span><span class="opt-desc">Στην κατάσταση και στις επιλογές.</span></span><input class="switch" id="large-text" type="checkbox"></label>
@@ -34,6 +35,6 @@
     <img id="picture-large" alt="">
     <p id="picture-caption"></p>
   </dialog>
-  <script type="module" src="src/app.js?v=20260917-small-nospeech"></script>
+  <script type="module" src="src/app.js?v=20260917-captions"></script>
 </body>
 </html>
