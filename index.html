@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="el">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#8DC63F">
+  <title>Τι μπορώ να κάνω; · ΣΥΝΟΙΔΑ</title>
+  <link rel="icon" href="assets/logo.webp">
+  <link rel="preload" href="assets/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles/app.css?v=20260917-small-nospeech">
+  <link rel="stylesheet" href="styles/shared-ui.css?v=20260917-small-nospeech">
+</head>
+<body>
+  <a class="skip" href="#main">Στο περιεχόμενο</a>
+  <header class="header">
+    <img class="logo" src="assets/logo.webp" alt="ΣΥΝΟΙΔΑ">
+    <div class="identity"><strong>Σύνοιδα</strong><small>Κέντρα Ειδικών Θεραπειών</small><small>Κοινωνικές καταστάσεις</small></div>
+  </header>
+  <main id="main" tabindex="-1"><p role="status">Ανοίγουμε τις ιστορίες…</p></main>
+  <footer><span>5–8 ετών, με θεραπευτή</span><span>Συζητάμε τις επιλογές και όσα μπορεί να συμβούν.</span></footer>
+  <dialog id="settings" class="settings" aria-labelledby="settings-title">
+    <div class="drawer-head"><h2 id="settings-title"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="15" cy="7" r="2.5"/><circle cx="9" cy="17" r="2.5"/></svg>Ρυθμίσεις θεραπευτή</h2><button class="drawer-close" id="close-settings-x" aria-label="Κλείσιμο">✕</button></div>
+    <div class="drawer-body">
+      <p class="drawer-sec">Εμφάνιση</p>
+      <label class="opt" for="show-feedback"><span class="opt-text"><span class="opt-title">Σχόλιο για την επιλογή</span><span class="opt-desc">Μετά τις δύο πιθανές συνέπειες.</span></span><input class="switch" id="show-feedback" type="checkbox"></label>
+      <label class="opt" for="show-notes"><span class="opt-text"><span class="opt-title">Σημειώσεις θεραπευτή</span><span class="opt-desc">Στόχος και σημεία για συζήτηση.</span></span><input class="switch" id="show-notes" type="checkbox"></label>
+      <label class="opt" for="large-text"><span class="opt-text"><span class="opt-title">Μεγαλύτερα γράμματα</span><span class="opt-desc">Στην κατάσταση και στις επιλογές.</span></span><input class="switch" id="large-text" type="checkbox"></label>
+    </div>
+    <div class="drawer-foot"><span class="drawer-ver">Κοινωνικές καταστάσεις · ΣΥΝΟΙΔΑ</span><button class="btn drawer-done" id="close-settings" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Έτοιμο</button></div>
+  </dialog>
+  <dialog id="picture-dialog" aria-labelledby="picture-title">
+    <div class="picture-head"><h2 id="picture-title">Η εικόνα μας</h2><button id="close-picture" class="btn neutral" aria-label="Κλείσιμο μεγέθυνσης">✕</button></div>
+    <img id="picture-large" alt="">
+    <p id="picture-caption"></p>
+  </dialog>
+  <script type="module" src="src/app.js?v=20260917-small-nospeech"></script>
+</body>
+</html>
