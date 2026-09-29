@@ -30,3 +30,9 @@ dialog{border:0;color:var(--grey)}#settings{margin:0 0 0 auto;width:min(390px,94
 #picture-recovery{min-height:240px;margin-top:12px}
 #picture-loading{min-height:200px;display:grid;place-items:center;text-align:center}
 @media(max-width:650px){.media-recovery{min-height:270px}.outcome .media-recovery{min-height:245px}}
+
+.update-notice{width:min(1116px,calc(100% - 32px));margin:0 auto 20px;padding:14px 18px;background:#f3f8e9;border:1px solid #a6c776;border-radius:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:#354922}
+.update-notice p{margin:0;font-size:15px;line-height:1.5}.update-notice>div{display:flex;gap:8px;flex-wrap:wrap}
+.app-update{margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}.app-update h3{font-size:15px;margin:0 0 8px}.app-update p{font-size:12px;line-height:1.5;color:#62676c;margin:8px 0 12px}.app-update .btn{font-size:14px}
+[aria-disabled="true"]{opacity:.65;cursor:wait}
+@media(max-width:650px){.update-notice{align-items:flex-start;flex-direction:column}}

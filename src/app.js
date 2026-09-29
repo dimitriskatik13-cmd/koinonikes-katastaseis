@@ -1,5 +1,5 @@
-import { shuffleChoices, findChoice, nextScene } from './engine.js';
-import { createScenePreloader } from './preload.js?v=20260930-release';
+import { shuffleChoices, findChoice, nextScene } from './engine.js?v=20260930.2';
+import { createScenePreloader } from './preload.js?v=20260930.2';
 
 const main = document.querySelector('main');
 const settings = document.querySelector('#settings');
@@ -140,7 +140,7 @@ function go(hash) {
   else location.hash=hash;
 }
 function showHome() {
-  main.innerHTML=`<section class="home"><h1>Τι μπορώ να κάνω;</h1><p class="home-sub">Μικρές ιστορίες. Διαφορετικές επιλογές.</p><p class="section-label">Πού θα πάμε σήμερα;</p><div class="categories">${bank.categories.map(c=>`<button class="category" data-action="category" data-category="${c.id}"><img class="category-image" src="assets/categories/small/${categoryImages[c.id]}.webp" alt="" width="320" height="320"><strong>${e(c.label)}</strong><small>${bank.scenes.filter(s=>s.category===c.id).length} καταστάσεις</small></button>`).join('')}</div></section>`;
+  main.innerHTML=`<section class="home"><h1>Τι μπορώ να κάνω;</h1><p class="home-sub">Μικρές ιστορίες. Διαφορετικές επιλογές.</p><p class="section-label">Πού θα πάμε σήμερα;</p><div class="categories">${bank.categories.map(c=>`<button class="category" data-action="category" data-category="${c.id}"><img class="category-image" src="assets/categories/small/${categoryImages[c.id]}.webp" alt="" width="320" height="320"><strong>${e(c.label)}</strong><small>${bank.scenes.filter(s=>s.category===c.id).length} καταστάσεις</small></button>`).join('')}</div><div class="home-bottom">${button('settings','Ρυθμίσεις','neutral','settings')}</div></section>`;
 }
 function tile(s, i) {
   return `<button class="story-tile" style="${color(s.category)}" data-action="scene" data-id="${s.id}"><span class="tile-top"><span class="tile-badge"><span class="tile-label">Ιστορία</span><span class="tile-number">${String(i+1).padStart(2,'0')}</span></span><span class="tile-arrow" aria-hidden="true">${icon('next')}</span></span><strong>${e(s.title)}</strong></button>`;
@@ -260,7 +260,7 @@ for(const [id,key] of [['show-feedback','feedback'],['show-notes','notes'],['lar
 window.addEventListener('hashchange',()=>{if(bank)loadRoute();});
 window.addEventListener('pagehide',()=>{scenePreloader.clear();clearCardTimers();clearTimeout(pictureTimer);});
 try {
-  const response=await fetch('data/scenarios.json?v=20260930-release');if(!response.ok)throw new Error('Δεν βρέθηκαν τα κείμενα.');
+  const response=await fetch('data/scenarios.json?v=20260930.2');if(!response.ok)throw new Error('Δεν βρέθηκαν τα κείμενα.');
   bank=await response.json();if(!Array.isArray(bank.scenes)||!bank.categories.every(c=>bank.scenes.filter(s=>s.category===c.id).length===c.count))throw new Error('Η τράπεζα περιεχομένου είναι ελλιπής.');
   loadRoute();
 } catch(error) {

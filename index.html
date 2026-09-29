@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#8DC63F">
+  <meta name="app-version" content="20260930.2">
   <title>Τι μπορώ να κάνω; · ΣΥΝΟΙΔΑ</title>
   <link rel="icon" href="assets/logo.webp">
   <link rel="preload" href="assets/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles/app.css?v=20260930-release">
-  <link rel="stylesheet" href="styles/shared-ui.css?v=20260930-release">
-  <link rel="stylesheet" href="styles/cards-3d.css?v=20260930-release">
+  <link rel="stylesheet" href="styles/app.css?v=20260930.2">
+  <link rel="stylesheet" href="styles/shared-ui.css?v=20260930.2">
+  <link rel="stylesheet" href="styles/cards-3d.css?v=20260930.2">
 </head>
 <body>
   <a class="skip" href="#main">Στο περιεχόμενο</a>
@@ -18,6 +19,10 @@
     <img class="logo" src="assets/logo.webp" alt="ΣΥΝΟΙΔΑ">
     <div class="identity"><strong>Σύνοιδα</strong><small>Κέντρα Ειδικών Θεραπειών</small><small>Κοινωνικές καταστάσεις</small></div>
   </header>
+  <aside id="update-notice" class="update-notice" hidden aria-label="Ενημέρωση εφαρμογής">
+    <p role="status">Υπάρχει νεότερη έκδοση της εφαρμογής.</p>
+    <div><button id="apply-update" class="btn neutral" type="button">Ενημέρωση τώρα</button><button id="dismiss-update" class="btn neutral" type="button">Αργότερα</button></div>
+  </aside>
   <main id="main" tabindex="-1">
     <section id="startup-state">
       <p id="startup-status" role="status">Ανοίγουμε τις ιστορίες…</p>
@@ -38,6 +43,12 @@
       <label class="opt" for="show-feedback"><span class="opt-text"><span class="opt-title">Σχόλιο για την επιλογή</span><span class="opt-desc">Μετά τις δύο πιθανές συνέπειες.</span></span><input class="switch" id="show-feedback" type="checkbox"></label>
       <label class="opt" for="show-notes"><span class="opt-text"><span class="opt-title">Σημειώσεις θεραπευτή</span><span class="opt-desc">Στόχος και σημεία για συζήτηση.</span></span><input class="switch" id="show-notes" type="checkbox"></label>
       <label class="opt" for="large-text"><span class="opt-text"><span class="opt-title">Μεγαλύτερα γράμματα</span><span class="opt-desc">Στην κατάσταση και στις επιλογές.</span></span><input class="switch" id="large-text" type="checkbox"></label>
+      <section class="app-update" aria-labelledby="update-heading">
+        <h3 id="update-heading">Ενημέρωση εφαρμογής</h3>
+        <p id="installed-version">Έκδοση 30/09/2026 · 2</p>
+        <a id="refresh-app" class="btn neutral full" href="./?v=20260930.2">Ανανέωση εφαρμογής</a>
+        <p id="update-status" role="status" aria-live="polite">Ελέγχει και ξαναφορτώνει την εφαρμογή με σύνδεση στο ίντερνετ.</p>
+      </section>
     </div>
     <div class="drawer-foot"><span class="drawer-ver">Κοινωνικές καταστάσεις · ΣΥΝΟΙΔΑ</span><button class="btn drawer-done" id="close-settings" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Έτοιμο</button></div>
   </dialog>
@@ -51,7 +62,8 @@
     </div>
     <p id="picture-caption"></p>
   </dialog>
-  <script id="app-module" type="module" src="src/app.js?v=20260930-release"></script>
+  <script id="app-module" type="module" src="src/app.js?v=20260930.2"></script>
+  <script type="module" src="src/updates.js?v=20260930.2"></script>
   <script>
     // This small fallback runs independently if the app or an imported module fails.
     (() => {
