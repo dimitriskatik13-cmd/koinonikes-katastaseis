@@ -1,0 +1,37 @@
+/* Review-only tactile story cards. Runtime, images and story choices are unchanged. */
+.story-grid{gap:24px 22px;padding:8px 2px 22px;perspective:1200px}
+.story-tile{
+  position:relative;isolation:isolate;min-height:176px;padding:20px 22px 22px;
+  display:flex;flex-direction:column;justify-content:space-between;gap:22px;
+  border:1px solid color-mix(in srgb,var(--accent) 26%,white);border-top:1px solid #fff;
+  border-radius:24px;background:linear-gradient(145deg,#fff 2%,var(--soft) 100%);
+  box-shadow:inset 0 1px 0 #fff,inset 0 -2px 0 #ffffffb3,
+    0 7px 0 color-mix(in srgb,var(--accent) 45%,#d5dcd0),
+    0 10px 3px #2632440b,0 18px 24px -13px #26324445;
+  color:#3e4939;transform:translateY(0);transform-origin:center bottom;
+  transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
+  -webkit-tap-highlight-color:transparent;overflow:visible;
+}
+.story-tile::before{content:"";pointer-events:none;position:absolute;inset:0;border-radius:inherit;z-index:-1;background:linear-gradient(118deg,#fff9,transparent 55%)}
+.tile-top{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.tile-badge{display:flex;align-items:center;gap:9px;color:var(--accent-dark)}
+.tile-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.tile-number{display:grid;place-items:center;width:38px;height:38px;border-radius:13px;background:#fff;
+  border:1px solid color-mix(in srgb,var(--accent) 25%,white);font-size:16px;font-weight:750;
+  box-shadow:inset 0 -3px 0 var(--soft),0 3px 6px #2632440b}
+.tile-arrow{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;color:var(--accent-dark);
+  background:color-mix(in srgb,var(--accent) 14%,white);box-shadow:inset 0 1px 1px #fff;transition:transform .18s ease}
+.tile-arrow .icon{width:16px;height:16px}
+.story-tile strong{position:relative;font-size:18px;font-weight:650;line-height:1.48;letter-spacing:-.025em}
+@media(hover:hover) and (pointer:fine){
+  .story-tile:hover{transform:translateY(-5px) rotateX(2deg);background:linear-gradient(145deg,#fff,var(--soft));border-color:color-mix(in srgb,var(--accent) 45%,white);
+    box-shadow:inset 0 1px 0 #fff,inset 0 -2px 0 #ffffffb3,0 10px 0 color-mix(in srgb,var(--accent) 45%,#d5dcd0),0 13px 4px #2632440b,0 24px 30px -13px #26324455}
+  .story-tile:hover .tile-arrow{transform:translateX(3px)}
+}
+.story-tile:active{transform:translateY(5px);box-shadow:inset 0 1px 0 #fff,0 2px 0 color-mix(in srgb,var(--accent) 45%,#d5dcd0),0 6px 10px -6px #26324438}
+.story-tile:focus-visible{outline:3px solid #225a95;outline-offset:7px}
+@media(max-width:900px){.story-grid{gap:23px 18px}.story-tile{padding:18px;min-height:170px}.story-tile strong{font-size:17px}}
+@media(max-width:650px){.story-grid{gap:21px 14px;padding-top:5px}.story-tile{min-height:160px;padding:15px 14px 18px;border-radius:20px;gap:17px}.story-tile strong{font-size:16px}.tile-label{font-size:9px;letter-spacing:0}.tile-top{gap:4px}.tile-badge{gap:6px}.tile-number{width:30px;height:32px;border-radius:10px;font-size:14px}.tile-arrow{width:26px;height:26px;flex:none}.tile-arrow .icon{width:14px;height:14px}}
+@media(prefers-reduced-motion:reduce){.story-tile,.tile-arrow{transition:none}.story-tile:hover{transform:none}.story-tile:hover .tile-arrow{transform:none}}
+
+.story-tile .tile-label{color:#3e4939}

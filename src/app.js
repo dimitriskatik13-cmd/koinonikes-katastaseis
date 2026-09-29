@@ -1,4 +1,5 @@
 import { shuffleChoices, findChoice, nextScene } from './engine.js';
+import { createScenePreloader } from './preload.js?v=20260930-release';
 
 const main = document.querySelector('main');
 const settings = document.querySelector('#settings');
@@ -19,13 +20,115 @@ const theme = {home:['#8dc63f','#f3f8e9','#547f1a'],school:['#00aeef','#edf9fe',
 const color = category => {const t=theme[category];return `--accent:${t[0]};--soft:${t[1]};--accent-dark:${t[2]}`;};
 const button = (action, label, cls='', symbol='', extra='') => `<button class="btn ${cls}" data-action="${action}" ${extra}>${symbol?icon(symbol):''}${e(label)}</button>`;
 const media = (text, kind='scene', src=null, large=null) => src
-  ? `<button type="button" class="scene-media with-art" data-media="${kind}" data-action="zoom" data-src="${e(large||src)}" data-caption="${e(text)}" aria-label="Μεγέθυνση: ${e(text)}"><img src="${e(src)}" alt="${e(text)}" decoding="async" width="480" height="480"><span class="zoom-hint" aria-hidden="true">⤢</span></button>`
+  ? `<div class="media-container" data-kind="${kind}"><button type="button" class="scene-media with-art" data-media="${kind}" data-action="zoom" data-src="${e(large||src)}" data-caption="${e(text)}" aria-label="Μεγέθυνση: ${e(text)}"><img src="${e(src)}" data-source="${e(src)}" alt="${e(text)}" decoding="async" width="480" height="480"><span class="zoom-hint" aria-hidden="true">⤢</span></button><div class="media-recovery" role="status" hidden><p>Δεν φορτώθηκε η εικόνα.</p><button class="btn neutral" type="button" data-action="retry-image">Δοκίμασε ξανά</button></div></div>`
   : `<div class="scene-media" data-media="${kind}" role="img" aria-label="${e(text)}. Η εικόνα δεν έχει δημιουργηθεί ακόμη."><div class="media-mark">${icon('picture')}</div><span>Η εικόνα θα προστεθεί</span></div>`;
 const editorialMode = ['127.0.0.1','localhost','[::1]'].includes(location.hostname);
 const categoryImages = {home:'place-home',school:'place-school',outside:'place-park'};
 let bank, scene, layout = [], selected = null, route = 'home', category = null;
 const previousLayouts = new Map();
 const preferences = {feedback:false, notes:false, large:false, captions:true};
+const scenePreloader = createScenePreloader();
+
+const picture = document.querySelector('#picture-large');
+const pictureRecovery = document.querySelector('#picture-recovery');
+const pictureLoading = document.querySelector('#picture-loading');
+let pictureTimer;
+const cardTimers = new Map();
+const cardFocus = new WeakSet();
+function clearCardTimers() {
+  for (const timer of cardTimers.values()) clearTimeout(timer);
+  cardTimers.clear();
+}
+function watchCard(img) {
+  clearTimeout(cardTimers.get(img));
+  if (img.complete && img.naturalWidth > 0) return;
+  cardTimers.set(img,setTimeout(()=>cardFailed(img),12000));
+}
+function retryUrl(source) {
+  const url = new URL(source, location.href);
+  url.searchParams.set('retry', Date.now());
+  return url.href;
+}
+function cardFailed(img) {
+  clearTimeout(cardTimers.get(img));
+  cardTimers.delete(img);
+  const container = img.closest('.media-container');
+  if (!container || !img.isConnected) return;
+  container.querySelector('.scene-media').hidden = true;
+  const recovery = container.querySelector('.media-recovery');
+  recovery.hidden = false;
+  recovery.querySelector('p').textContent = 'Δεν φορτώθηκε η εικόνα. Έλεγξε τη σύνδεσή σου και δοκίμασε ξανά.';
+  recovery.querySelector('button').disabled = false;
+  if (cardFocus.has(img)) {
+    cardFocus.delete(img);
+    recovery.querySelector('button').focus({preventScroll:true});
+  }
+}
+function pictureFailed() {
+  if (!picture.dataset.source) return;
+  clearTimeout(pictureTimer);
+  picture.hidden = true;
+  pictureLoading.hidden = true;
+  pictureRecovery.hidden = false;
+}
+function loadPicture(source, retry=false) {
+  clearTimeout(pictureTimer);
+  if (document.activeElement.id === 'retry-picture') document.querySelector('#close-picture').focus({preventScroll:true});
+  picture.dataset.source = source;
+  picture.hidden = true;
+  pictureRecovery.hidden = true;
+  pictureLoading.hidden = false;
+  pictureTimer = setTimeout(pictureFailed, 12000);
+  picture.src = retry ? retryUrl(source) : source;
+}
+// Image errors do not bubble, so capture them before a broken image is left on screen.
+main.addEventListener('error', event => {
+  if (event.target.matches('.scene-media img')) cardFailed(event.target);
+  else if (event.target.matches('.category-image')) event.target.hidden = true;
+}, true);
+main.addEventListener('load', event => {
+  const img = event.target;
+  if (!img.matches('.scene-media img')) return;
+  clearTimeout(cardTimers.get(img));
+  cardTimers.delete(img);
+  const container = img.closest('.media-container');
+  const retry = container.querySelector('[data-action="retry-image"]');
+  const restoreFocus = document.activeElement === retry || cardFocus.has(img);
+  cardFocus.delete(img);
+  container.querySelector('.scene-media').hidden = false;
+  container.querySelector('.media-recovery').hidden = true;
+  if (restoreFocus) container.querySelector('.scene-media').focus({preventScroll:true});
+}, true);
+picture.addEventListener('error', () => {
+  if (picture.complete && !picture.naturalWidth) pictureFailed();
+});
+picture.addEventListener('load', () => {
+  if (!picture.dataset.source || !picture.naturalWidth || picture.currentSrc !== picture.src) return;
+  clearTimeout(pictureTimer);
+  const restoreFocus = document.activeElement.id === 'retry-picture';
+  picture.hidden = false;
+  pictureLoading.hidden = true;
+  pictureRecovery.hidden = true;
+  if (restoreFocus) document.querySelector('#close-picture').focus({preventScroll:true});
+});
+document.querySelector('#retry-picture').onclick = () => {
+  if (picture.dataset.source) loadPicture(picture.dataset.source, true);
+};
+// Keep keyboard traversal inside the active modal, including the last control.
+for (const dialog of [settings, document.querySelector('#picture-dialog')]) {
+  dialog.addEventListener('keydown', event => {
+    if (event.key !== 'Tab') return;
+    const controls = [...dialog.querySelectorAll('button:not(:disabled), input:not(:disabled), a[href], [tabindex="0"]')]
+      .filter(node => node.getClientRects().length > 0);
+    const first = controls[0], last = controls.at(-1);
+    if (!first) return;
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault(); last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault(); first.focus();
+    }
+  });
+}
 
 function categoryLabel(id) { return bank.categories.find(c=>c.id===id)?.label || ''; }
 function toolbar(extra='') {
@@ -40,7 +143,7 @@ function showHome() {
   main.innerHTML=`<section class="home"><h1>Τι μπορώ να κάνω;</h1><p class="home-sub">Μικρές ιστορίες. Διαφορετικές επιλογές.</p><p class="section-label">Πού θα πάμε σήμερα;</p><div class="categories">${bank.categories.map(c=>`<button class="category" data-action="category" data-category="${c.id}"><img class="category-image" src="assets/categories/small/${categoryImages[c.id]}.webp" alt="" width="320" height="320"><strong>${e(c.label)}</strong><small>${bank.scenes.filter(s=>s.category===c.id).length} καταστάσεις</small></button>`).join('')}</div></section>`;
 }
 function tile(s, i) {
-  return `<button class="story-tile" style="${color(s.category)}" data-action="scene" data-id="${s.id}"><small>Ιστορία ${String(i+1).padStart(2,'0')}</small><strong>${e(s.title)}</strong></button>`;
+  return `<button class="story-tile" style="${color(s.category)}" data-action="scene" data-id="${s.id}"><span class="tile-top"><span class="tile-badge"><span class="tile-label">Ιστορία</span><span class="tile-number">${String(i+1).padStart(2,'0')}</span></span><span class="tile-arrow" aria-hidden="true">${icon('next')}</span></span><strong>${e(s.title)}</strong></button>`;
 }
 function renderCategoryTiles() {
   const scenes=bank.scenes.filter(s=>s.category===category);
@@ -54,16 +157,19 @@ function notes(s) {
   return `<aside class="notes"><h2>Για τον θεραπευτή</h2><p><strong>Στόχος:</strong> ${e(s.goal)}</p><p>${e(s.teacherNote)}</p>${s.rankReview?'<p class="review-flag">Η διαβάθμιση των δύο αποδεκτών λύσεων χρειάζεται ειδική συζήτηση πριν οριστικοποιηθεί.</p>':''}${s.safetyNote?`<p>${e(s.safetyNote)}</p>`:''}<p><strong>Συζήτηση:</strong> ${e(s.discussionPrompt)}</p><p>Αρχές: ${s.sourcePrinciples.join(', ')}. Πρωτότυπο προσχέδιο προς επιβεβαίωση.</p></aside>`;
 }
 function showScene() {
+  clearCardTimers();
   const items=bank.scenes.filter(s=>s.category===category);
   main.innerHTML=toolbar(button('category','Καταστάσεις','neutral','back',`data-category="${category}"`)+button('next','Νέα κατάσταση','new','refresh'))+
     `<h1 class="page-title">${e(scene.title)}</h1><p class="eyebrow">${e(categoryLabel(category))} · ${items.indexOf(scene)+1} / ${items.length}</p>`+
     (selected?outcomeMarkup():`<div class="scene-layout"><section>${media(scene.context,'scene',scene.sceneImage,scene.sceneLargeImage)}<p class="scene-context">${e(scene.context)}</p></section><section aria-labelledby="question"><h2 class="question" id="question">Τι μπορώ να κάνω;</h2><div class="choices">${layout.map((c,i)=>`<button class="choice" data-action="choose" data-choice="${c.id}"><span class="choice-num">${i+1}.</span><span>${e(c.text)}</span></button>`).join('')}</div></section></div>`)+
     (preferences.notes?notes(scene):'');
+  main.querySelectorAll('.scene-media img').forEach(watchCard);
+  if (!selected) scenePreloader.start(scene, main.querySelector('[data-media="scene"] img'));
 }
 function outcomeMarkup() {
   const choice=findChoice(scene,selected);
   const feedback={1:'Αυτή η επιλογή βοηθά να βρούμε μια λύση.',2:'Αυτή είναι επίσης μια καλή επιλογή. Μπορεί να χρειαστεί κι ένα βήμα ακόμη.',3:'Έτσι μπορεί να γίνει πιο δύσκολο να τα βρούμε.',4:'Έτσι μπορεί κάποιος να πληγωθεί ή το πρόβλημα να μεγαλώσει.'};
-  return `<div class="selected-answer"><small>Διάλεξα…</small>${e(choice.text)}</div><h2 class="outcome-title" tabindex="-1">Τι μπορεί να συμβεί;</h2><p class="outcome-sub">Δύο διαφορετικές συνέχειες. Μπορεί να γίνει κι αλλιώς.</p><div class="outcomes">${choice.outcomes.map((o,i)=>`<article class="outcome" data-outcome="${o.id}"><h3>${i===0?'Ένα ενδεχόμενο':'Ένα άλλο ενδεχόμενο'}</h3>${media(o.text,'outcome',o.image,o.largeImage)}<p>${e(o.text)}</p></article>`).join('')}</div>${preferences.feedback?`<p class="feedback">${e(scene.rankReview&&choice.rank<=2?'Αυτή είναι μια αποδεκτή επιλογή. Ας συζητήσουμε πότε βοηθά.':feedback[choice.rank])}</p>`:''}${choice.rank===4 && scene.safetyNote?'<p class="safety-line">Αν κινδυνεύει κάποιος, ζητάμε βοήθεια. Το χτύπημα δεν είναι λύση.</p>':''}<div class="outcome-actions">${button('retry','Δοκίμασε άλλη επιλογή','neutral','back')}${button('next','Επόμενη κατάσταση','new','next')}</div>`;
+  return `<div class="selected-answer"><small>Διάλεξα…</small>${e(choice.text)}</div><h2 class="outcome-title" tabindex="-1">Τι μπορεί να συμβεί;</h2><p class="outcome-sub">Δύο διαφορετικές συνέχειες. Μπορεί να γίνει κι αλλιώς.</p><div class="outcomes">${choice.outcomes.map((o,i)=>`<article class="outcome" data-outcome="${o.id}"><h3>${i===0?'Ένα ενδεχόμενο':'Ένα άλλο ενδεχόμενο'}</h3>${media(o.text,'outcome',o.image,o.largeImage)}<p>${e(o.text)}</p></article>`).join('')}</div>${preferences.feedback?`<p class="feedback">${e(scene.rankReview&&choice.rank<=2?'Αυτή είναι μια αποδεκτή επιλογή. Ας συζητήσουμε πότε βοηθά.':feedback[choice.rank])}</p>`:''}${choice.rank===4 && scene.safetyNote?'<p class="safety-line">Αν κινδυνεύει κάποιος, ζητάμε βοήθεια από έναν έμπιστο ενήλικα.</p>':''}<div class="outcome-actions">${button('retry','Δοκίμασε άλλη επιλογή','neutral','back')}${button('next','Επόμενη κατάσταση','new','next')}</div>`;
 }
 function renderReviewList() {
   const filter=document.querySelector('#review-category').value;
@@ -76,6 +182,10 @@ function showReview() {
   renderReviewList();
 }
 function loadRoute() {
+  scenePreloader.clear();
+  clearCardTimers();
+  if (settings.open) settings.close();
+  if (document.querySelector('#picture-dialog').open) document.querySelector('#picture-dialog').close();
   selected=null;
   const parts=location.hash.slice(1).split('/');
   route=parts[0]||'home';
@@ -90,10 +200,19 @@ function loadRoute() {
 main.addEventListener('click',event=>{
   const target=event.target.closest('[data-action]');if(!target)return;
   const action=target.dataset.action;
-  if(action==='zoom'){
-    document.querySelector('#picture-large').src=target.dataset.src;
-    document.querySelector('#picture-large').alt=target.dataset.caption;
+  if(action==='retry-image'){
+    const container=target.closest('.media-container');
+    const img=container.querySelector('img');
+    if (document.activeElement === target) cardFocus.add(img);
+    target.disabled=true;
+    container.querySelector('.media-recovery p').textContent='Φορτώνουμε την εικόνα…';
+    img.src=retryUrl(img.dataset.source);
+    watchCard(img);
+  }
+  else if(action==='zoom'){
+    picture.alt=target.dataset.caption;
     document.querySelector('#picture-caption').textContent=target.dataset.caption;
+    loadPicture(target.dataset.src);
     document.querySelector('#picture-dialog').showModal();
   }
   else if(action==='home')go('home');
@@ -104,6 +223,7 @@ main.addEventListener('click',event=>{
   else if(action==='random'||action==='next'){
     const s=nextScene(bank.scenes.filter(s=>s.category===category),action==='next'?scene.id:null);go(`scene/${s.id}`);
   } else if(action==='choose'){
+    scenePreloader.pause();
     selected=target.dataset.choice;findChoice(scene,selected);showScene();
     document.querySelector('.outcome-title').focus({preventScroll:true});window.scrollTo(0,0);
   } else if(action==='retry'){
@@ -114,12 +234,20 @@ main.addEventListener('change',event=>{if(event.target.id==='review-category')re
 document.querySelector('#close-settings').onclick=()=>settings.close();
 document.querySelector('#close-picture').onclick=()=>document.querySelector('#picture-dialog').close();
 document.querySelector('#picture-dialog').addEventListener('close',()=>{
-  const picture=document.querySelector('#picture-large');
-  picture.removeAttribute('src');picture.alt='';
+  // A queued close event from an earlier opening must not clear a newly opened image.
+  if (document.querySelector('#picture-dialog').open) return;
+  clearTimeout(pictureTimer);
+  delete picture.dataset.source;
+  picture.removeAttribute('src');picture.alt='';picture.hidden=true;
+  pictureRecovery.hidden=true;pictureLoading.hidden=true;
   document.querySelector('#picture-caption').textContent='';
 });
 document.querySelector('#close-settings-x').onclick=()=>settings.close();
-settings.addEventListener('close',()=>document.body.classList.remove('drawer-open'));
+settings.addEventListener('close',()=>{
+  if (settings.open) return;
+  document.body.classList.remove('drawer-open');
+  (main.querySelector('[data-action="settings"]') || main).focus({preventScroll:true});
+});
 document.querySelector('.skip').onclick=event=>{event.preventDefault();main.focus();};
 settings.addEventListener('click',event=>{if(event.target===settings&&event.clientX<settings.getBoundingClientRect().left)settings.close();});
 for(const [id,key] of [['show-feedback','feedback'],['show-notes','notes'],['large-text','large'],['show-captions','captions']]){
@@ -130,10 +258,11 @@ for(const [id,key] of [['show-feedback','feedback'],['show-notes','notes'],['lar
   });
 }
 window.addEventListener('hashchange',()=>{if(bank)loadRoute();});
+window.addEventListener('pagehide',()=>{scenePreloader.clear();clearCardTimers();clearTimeout(pictureTimer);});
 try {
-  const response=await fetch('data/scenarios.json?v=20260917-quality480');if(!response.ok)throw new Error('Δεν βρέθηκαν τα κείμενα.');
+  const response=await fetch('data/scenarios.json?v=20260930-release');if(!response.ok)throw new Error('Δεν βρέθηκαν τα κείμενα.');
   bank=await response.json();if(!Array.isArray(bank.scenes)||!bank.categories.every(c=>bank.scenes.filter(s=>s.category===c.id).length===c.count))throw new Error('Η τράπεζα περιεχομένου είναι ελλιπής.');
   loadRoute();
 } catch(error) {
-  main.innerHTML=`<section class="error"><h1>Δεν άνοιξαν οι ιστορίες</h1><p>Ανανέωσε τη σελίδα και δοκίμασε ξανά.</p><p>${e(error.message)}</p></section>`;
+  main.innerHTML=`<section class="error" role="alert"><h1>Δεν άνοιξαν οι ιστορίες</h1><p>Έλεγξε τη σύνδεσή σου και δοκίμασε ξανά.</p><p>${e(error.message)}</p>${button('reload','Δοκίμασε ξανά','neutral')}</section>`;
 }

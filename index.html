@@ -8,8 +8,9 @@
   <title>Τι μπορώ να κάνω; · ΣΥΝΟΙΔΑ</title>
   <link rel="icon" href="assets/logo.webp">
   <link rel="preload" href="assets/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles/app.css?v=20260917-captions">
-  <link rel="stylesheet" href="styles/shared-ui.css?v=20260917-small-nospeech">
+  <link rel="stylesheet" href="styles/app.css?v=20260930-release">
+  <link rel="stylesheet" href="styles/shared-ui.css?v=20260930-release">
+  <link rel="stylesheet" href="styles/cards-3d.css?v=20260930-release">
 </head>
 <body>
   <a class="skip" href="#main">Στο περιεχόμενο</a>
@@ -17,7 +18,17 @@
     <img class="logo" src="assets/logo.webp" alt="ΣΥΝΟΙΔΑ">
     <div class="identity"><strong>Σύνοιδα</strong><small>Κέντρα Ειδικών Θεραπειών</small><small>Κοινωνικές καταστάσεις</small></div>
   </header>
-  <main id="main" tabindex="-1"><p role="status">Ανοίγουμε τις ιστορίες…</p></main>
+  <main id="main" tabindex="-1">
+    <section id="startup-state">
+      <p id="startup-status" role="status">Ανοίγουμε τις ιστορίες…</p>
+      <div id="startup-recovery" class="error" hidden role="alert">
+        <h1>Δεν ολοκληρώθηκε η φόρτωση</h1>
+        <p>Έλεγξε τη σύνδεσή σου και δοκίμασε ξανά.</p>
+        <button class="btn neutral" type="button" data-action="reload">Δοκίμασε ξανά</button>
+      </div>
+      <noscript><style>#startup-status{display:none}</style><p>Για να ανοίξουν οι ιστορίες, χρειάζεται ενεργοποιημένη JavaScript στον περιηγητή.</p></noscript>
+    </section>
+  </main>
   <footer><span>5–8 ετών, με θεραπευτή</span><span>Συζητάμε τις επιλογές και όσα μπορεί να συμβούν.</span></footer>
   <dialog id="settings" class="settings" aria-labelledby="settings-title">
     <div class="drawer-head"><h2 id="settings-title"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="15" cy="7" r="2.5"/><circle cx="9" cy="17" r="2.5"/></svg>Ρυθμίσεις θεραπευτή</h2><button class="drawer-close" id="close-settings-x" aria-label="Κλείσιμο">✕</button></div>
@@ -32,9 +43,38 @@
   </dialog>
   <dialog id="picture-dialog" aria-labelledby="picture-title">
     <div class="picture-head"><h2 id="picture-title">Η εικόνα μας</h2><button id="close-picture" class="btn neutral" aria-label="Κλείσιμο μεγέθυνσης">✕</button></div>
-    <img id="picture-large" alt="">
+    <img id="picture-large" alt="" hidden>
+    <p id="picture-loading" role="status" hidden>Φορτώνουμε την εικόνα…</p>
+    <div id="picture-recovery" class="media-recovery" role="status" hidden>
+      <p>Δεν φορτώθηκε η μεγάλη εικόνα.</p>
+      <button id="retry-picture" class="btn neutral" type="button">Δοκίμασε ξανά</button>
+    </div>
     <p id="picture-caption"></p>
   </dialog>
-  <script type="module" src="src/app.js?v=20260917-quality480"></script>
+  <script id="app-module" type="module" src="src/app.js?v=20260930-release"></script>
+  <script>
+    // This small fallback runs independently if the app or an imported module fails.
+    (() => {
+      const main = document.getElementById('main');
+      const showRecovery = () => {
+        const recovery = document.getElementById('startup-recovery');
+        if (!recovery) return;
+        document.getElementById('startup-status').hidden = true;
+        recovery.hidden = false;
+      };
+      const timer = setTimeout(showRecovery, 12000);
+      document.getElementById('app-module').addEventListener('error', showRecovery);
+      const observer = new MutationObserver(() => {
+        if (!document.getElementById('startup-state')) {
+          clearTimeout(timer);
+          observer.disconnect();
+        }
+      });
+      observer.observe(main, {childList: true});
+      document.addEventListener('click', event => {
+        if (event.target.closest('[data-action="reload"]')) location.reload();
+      });
+    })();
+  </script>
 </body>
 </html>
