@@ -76,6 +76,19 @@ document.querySelector('#dismiss-update').addEventListener('click', () => {
   // Dismissing a notice must not leave keyboard focus on a hidden button.
   document.querySelector('main').focus({preventScroll:true});
 });
+// Service worker: offline λειτουργία. Η νέα έκδοση κατεβαίνει στο παρασκήνιο και
+// παίρνει τον έλεγχο· τότε ξαναελέγχουμε το version.json ώστε να βγει η ειδοποίηση.
+const LOCAL_HOSTS = ['localhost', '127.0.0.1', '[::1]'];
+if ('serviceWorker' in navigator && !LOCAL_HOSTS.includes(location.hostname)) {
+  navigator.serviceWorker.addEventListener('controllerchange', () => check(true));
+  window.addEventListener('load', async () => {
+    let registration;
+    try { registration = await navigator.serviceWorker.register('sw.js'); } catch { return; }
+    const update = () => registration.update().catch(() => {});
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) update(); });
+    update();
+  });
+}
 window.addEventListener('pageshow', event => { if (event.persisted) check(true); });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
 window.addEventListener('online', () => check(true));
